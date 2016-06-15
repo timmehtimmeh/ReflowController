@@ -1,0 +1,44 @@
+{
+   "packages":[
+      {
+         "name":"TimmehTimmeh",
+         "maintainer":"TimmehTimmeh ",
+         "websiteURL":"https://www.TimmehTimmeh.com",
+         "email":"TechSupport@TimmehTimmeh.com",
+         "help":{
+            "online":"https://forum.TimmehTimmeh.com"
+         },
+         "platforms":[
+            {
+               "name":"TimmehTimmeh AVR Boards",
+               "architecture":"avr",
+               "version":"0.0.1",
+               "category":"Contributed",
+               "url":"https://github.com/TimmehTimmeh/Arduino_Boards/raw/master/IDE_Board_Manager/TimmehTimmehboards.0.0.1.tar.bz2",
+               "archiveFileName":"TimmehTimmehboards.1.1.5.tar.bz2",
+               "checksum":"SHA-256:41f9728983e0dbab597bb46ddf00b5bac6cfec7c8f3771ecd1612dae58bb0366",
+               "size":"1162215",
+               "help":{
+                  "online":"https://forums.TimmehTimmeh.com"
+               },
+               "boards":[
+                  { "name":"ReflowBoard" },
+               ],
+               "toolsDependencies":[
+                  {
+                     "packager":"arduino",
+                     "name":"avr-gcc",
+                     "version":"4.8.1-arduino5"
+                  },
+                  {
+                     "packager":"arduino",
+                     "name":"avrdude",
+                     "version":"6.0.1-arduino5"
+                  }
+               ]
+            }
+         ],
+         "tools":[]
+      },
+   ]
+}
