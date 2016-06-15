@@ -22,7 +22,7 @@
                   "online":"https://monkeys.TimmehTimmeh.com"
                },
                "boards":[
-                  { "name":"ReflowBoard" },
+                  { "name":"ReflowBoard" }
                ],
                "toolsDependencies":[
                   {
