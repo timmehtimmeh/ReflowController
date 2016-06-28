@@ -1,41 +1,13 @@
 # TimmehTimmeh's Arduino Board
 
-This repository contains support for the following TimmehTimmeh Arduino-compatible development boards:
+This repository contains support for the following TimmehTimmeh Arduino-compatible reflow oven controller.
 
-#### AVR Boards
+This project is based on TMK's headless reflow oven (https://github.com/tmk/HeadlessReflowOven) which is in turn based on  work of ohararp ReflowOven,
+  (https://github.com/ohararp/ReflowOven)
 
-* [Tim's Reflow Board]
+which is modification of rocketscream Reflow-Oven-Controller.
+  (https://github.com/rocketscream/Reflow-Oven-Controller)
 
+rocketscream released the work under Creative Commons Share Alike v3.0 license.
 
-
-Each board will be added as an entry to the Arduino **Tools** > **Board** menu.
-
-![Example image](boards_list.png)
-
-### Installation Instructions
-
-To add board support for our products, go to **File** > **Preferences**, and paste this URL into the 'Additional Boards Manager URLs' input field:
-
-	https://raw.githubusercontent.com/timmehtimmeh/ReflowController/master/ReflowBoard/IDE_Board_Manager/package_TimmehTimmeh_index.json
-
-![Adding a board manager list](Preferences.png)
-
-This field can be found in 'Preferences...' under the Arduino File menu.
-
-Now, under the **Tools** > **Board** > **Boards Manager...**, if you type in "TimmehTimmeh", you will see an option to install board files for the reflow controller board. Click "Install" to add these to your list.
-
-**NOTE: If you are using Arduino 1.6.6 and the link isn't working for you, change "https" at the beginning of the link to "http" and try again. We're working to figure out why this is happening in version 1.6.6.**
-
-![TimmehTimmeh Boards image](TimmehTimmehBoards.PNG)
-
-Now, when you select the Boards list, you will see a collection of new boards for Timmeh.
-
-
-### Cleaning up the Boards Menu
-
-Each entry in the boards list is defined in [boards.txt](https://github.com/timmehtimmeh/ReflowController/blob/master/ReflowBoard/timmehtimmeh/avr/boards.txt).
-
-### Notes
-
-* **Please note: This will only work under Arduino IDE versions 1.5 and up.**
-* Information on compiling and programming the bootloaders can be found in the bootloaders directory.
+The bootloader and corresponding instructions are a modification of Sparkfun's bootloader code: (https://github.com/sparkfun/Arduino_Boards)
