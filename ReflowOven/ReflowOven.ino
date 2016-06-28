@@ -35,6 +35,19 @@ typedef enum REFLOW_STATUS
   REFLOW_STATUS_ON
 } reflowStatus_t;
 
+typedef enum MENU_STATE
+{
+  MENU_START_SELECTED,
+  MENU_PREHEAT_PARAMS_SELECTED,
+  MENU_SET_PREHEAT_PARAMS,
+  MENU_SOAK_PARAMS_SELECTED,
+  MENU_SET_SOAK_PARAMS,
+  MENU_REFLOW_PARAMS_SELECTED,
+  MENU_SET_REFLOW_PARAMS,
+  MENU_COOL_PARAMS_SELECTED,
+  MENU_SET_COOL_PARAMS,
+  MENU_STATE_REFLOWING
+} menuState_t;
 
 
 /*  Reflow temperature profile
@@ -92,7 +105,7 @@ float PID_KP_REFLOW          = 300;
 float PID_KI_REFLOW          = 0.05;
 float PID_KD_REFLOW          = 350;
 
-#define PID_SAMPLE_TIME 1000
+#define PID_SAMPLE_TIME        1000
 #define SENSOR_SAMPLING_TIME   1000
 
 
@@ -112,10 +125,6 @@ const char* ssdMessagesReflowStatus[] = {
 //
 // Pin Definitions
 //
-//int HeaterPin = 5;  // Heater Element(active-high)
-//int BuzPin = 6;     // Buzzer Pin
-//int Led = 7;        // Heartbeat Led
-//int But1 = 4;       // Start Button(pulluped, active-low)
 
 int noPin = -1;
 int upPin = A2;
@@ -137,6 +146,7 @@ LiquidCrystal lcd(5, 4, 1, 0, 2, 3);
 double setpoint;
 double input;
 double inputOld; //Store old Temperature
+double inputF;
 double output;
 double kp = PID_KP_PREHEAT;
 double ki = PID_KI_PREHEAT;
@@ -153,6 +163,8 @@ boolean StartTest;
 reflowState_t reflowState;
 // Reflow oven controller status
 reflowStatus_t reflowStatus;
+
+menuState_t menuState;
 
 //Button Variables
 byte ButtCount  = 0;
@@ -187,7 +199,7 @@ void setup()   {
   pinMode(HeaterPin, OUTPUT);
   //pinMode(BuzPin, OUTPUT);
 
-  //digitalWrite(HeaterPin, LOW);
+  digitalWrite(HeaterPin, LOW);
   //digitalWrite(BuzPin, LOW);
 
   //button pin setup
@@ -209,8 +221,218 @@ void setup()   {
   nextRead = millis();
   // Set Relow Status = OFF
   reflowStatus = REFLOW_STATUS_OFF;
+  menuState = MENU_START_SELECTED;
+
   StartTest = false;
 }
+
+void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, bool selectPin) {
+
+  Serial.print(leftPin);
+  Serial.print(rightPin);
+  Serial.print(upPin);
+  Serial.print(downPin);
+  Serial.println(selectPin);
+
+  //  MENU_START_SELECTED,
+  //  MENU_PREHEAT_PARAMS_SELECTED,
+  //  MENU_SET_PREHEAT_PARAMS,
+  //  MENU_SOAK_PARAMS_SELECTED,
+  //  MENU_SET_SOAK_PARAMS,
+  //  MENU_REFLOW_PARAMS_SELECTED,
+  //  MENU_SET_REFLOW_PARAMS,
+  //  MENU_COOL_PARAMS_SELECTED,
+  //  MENU_SET_COOL_PARAMS,
+  //  MENU_STATE_REFLOWING
+
+  switch (menuState)
+  {
+    case MENU_START_SELECTED:
+      lcd.setCursor(0, 0);
+      lcd.print("Cool >Start  Preheat");
+      inputF = thermocouple.readFarenheit();
+      lcd.setCursor(11, 1);
+      lcd.print(inputF);
+      if (leftPin) {
+        menuState = MENU_COOL_PARAMS_SELECTED;
+      } else if (rightPin) {
+        menuState = MENU_PREHEAT_PARAMS_SELECTED;
+      }
+      else if (selectPin) {
+        menuState = MENU_STATE_REFLOWING;
+      }
+      break;
+    case MENU_PREHEAT_PARAMS_SELECTED:
+      lcd.setCursor(0, 0);
+      lcd.print("Start >Preheat  Soak");
+      inputF = thermocouple.readFarenheit();
+      lcd.setCursor(11, 1);
+      lcd.print(inputF);
+      if (leftPin) {
+        menuState = MENU_START_SELECTED;
+      } else if (rightPin) {
+        menuState = MENU_SOAK_PARAMS_SELECTED;
+      } else if (selectPin || upPin || downPin) {
+        menuState = MENU_SET_PREHEAT_PARAMS;
+      }
+      //      else if (upPin || downPin) {
+      //        menuState = MENU_START_SELECTED;
+      //      }
+
+      break;
+    case MENU_SOAK_PARAMS_SELECTED:
+      lcd.setCursor(0, 0);
+      lcd.print("Preheat >Soak Reflow");
+      inputF = thermocouple.readFarenheit();
+      lcd.setCursor(11, 1);
+      lcd.print(inputF);
+      if (leftPin) {
+        menuState = MENU_PREHEAT_PARAMS_SELECTED;
+      } else if (rightPin) {
+        menuState = MENU_REFLOW_PARAMS_SELECTED;
+      } else if (selectPin || upPin || downPin) {
+        menuState = MENU_SET_SOAK_PARAMS;
+      }
+      //      else if (upPin || downPin) {
+      //        menuState = MENU_START_SELECTED;
+      //      }
+      break;
+    case MENU_REFLOW_PARAMS_SELECTED:
+      lcd.setCursor(0, 0);
+      lcd.print("Soak >Reflow Cool");
+      inputF = thermocouple.readFarenheit();
+      lcd.setCursor(11, 1);
+      lcd.print(inputF);
+      if (leftPin) {
+        menuState = MENU_SOAK_PARAMS_SELECTED;
+      } else if (rightPin) {
+        menuState = MENU_COOL_PARAMS_SELECTED;
+      } else if (selectPin || upPin || downPin) {
+        menuState = MENU_SET_REFLOW_PARAMS;
+      }
+      //      else if (upPin || downPin) {
+      //        menuState = MENU_START_SELECTED;
+      //      }
+      break;
+    case MENU_COOL_PARAMS_SELECTED:
+      lcd.setCursor(0, 0);
+      lcd.print("Reflow >Cool  Start");
+      inputF = thermocouple.readFarenheit();
+      lcd.setCursor(11, 1);
+      lcd.print(inputF);
+      if (leftPin) {
+        menuState = MENU_REFLOW_PARAMS_SELECTED;
+      } else if (rightPin) {
+        menuState = MENU_START_SELECTED;
+      } else if (selectPin || upPin || downPin) {
+        menuState = MENU_SET_COOL_PARAMS;
+      }
+      //      else if (upPin || downPin) {
+      //        menuState = MENU_START_SELECTED;
+      //      }
+      break;
+
+    //TEMP SETTINGS
+    //        float TEMPERATURE_COOL       = 100;
+    //        float TEMPERATURE_SOAK_MIN   = 150;
+    //        float TEMPERATURE_SOAK_MAX   = 170;
+    //        float TEMPERATURE_REFLOW_MAX = 230;
+
+    case MENU_SET_PREHEAT_PARAMS:
+      lcd.setCursor(0, 0);
+      lcd.print("Preheat Max     Curr");
+      lcd.setCursor(0, 1);
+      lcd.print(TEMPERATURE_SOAK_MIN);
+      inputF = thermocouple.readFarenheit();
+      lcd.setCursor(11, 1);
+      lcd.print(inputF);
+      if (leftPin || downPin) {
+        TEMPERATURE_SOAK_MIN -= 5;
+      } else if (rightPin || upPin) {
+        TEMPERATURE_SOAK_MIN += 5;
+      } else if (selectPin  ) {
+        menuState = MENU_PREHEAT_PARAMS_SELECTED;
+      }
+      break;
+    case MENU_SET_SOAK_PARAMS:
+      lcd.setCursor(0, 0);
+      lcd.print("Soak Max     Curr");
+      lcd.setCursor(0, 1);
+      lcd.print(TEMPERATURE_SOAK_MAX);
+      inputF = thermocouple.readFarenheit();
+      lcd.setCursor(11, 1);
+      lcd.print(inputF);
+      if (leftPin || downPin) {
+        TEMPERATURE_SOAK_MAX -= 5;
+      } else if (rightPin || upPin) {
+        TEMPERATURE_SOAK_MAX += 5;
+      } else if (selectPin || upPin || downPin) {
+        menuState = MENU_SOAK_PARAMS_SELECTED;
+      }
+      break;
+    case MENU_SET_REFLOW_PARAMS:
+      lcd.setCursor(0, 0);
+      lcd.print("Reflow Max     Curr");
+      lcd.setCursor(0, 1);
+      lcd.print(TEMPERATURE_REFLOW_MAX);
+      inputF = thermocouple.readFarenheit();
+      lcd.setCursor(11, 1);
+      lcd.print(inputF);
+      if (leftPin || downPin) {
+        TEMPERATURE_REFLOW_MAX -= 5;
+      } else if (rightPin || upPin) {
+        TEMPERATURE_REFLOW_MAX += 5;
+      } else if (selectPin || upPin || downPin) {
+        menuState = MENU_REFLOW_PARAMS_SELECTED;
+      }
+      break;
+    case MENU_SET_COOL_PARAMS:
+      lcd.setCursor(0, 0);
+      lcd.print("Cool To     Curr");
+      lcd.setCursor(0, 1);
+      lcd.print(TEMPERATURE_COOL);
+      inputF = thermocouple.readFarenheit();
+      lcd.setCursor(11, 1);
+      lcd.print(inputF);
+      if (leftPin || downPin) {
+        TEMPERATURE_COOL -= 5;
+      } else if (rightPin || upPin) {
+        TEMPERATURE_COOL += 5;
+      } else if (selectPin || upPin || downPin) {
+        menuState = MENU_COOL_PARAMS_SELECTED;
+      }
+      break;
+  }
+
+
+}
+
+
+//returns true if pin is held high for longer than 50ms
+bool debounceButton(int pin) {
+
+  bool ret = false;
+  int count = 0;
+
+  for (int i = 0; i < 5; i++) {
+    if (digitalRead(pin) == HIGH)
+    {
+      count++;
+      delay(20);
+    }
+  }
+
+  if (count >= 4)
+  {
+    ret = true;
+  } else
+  {
+    ret = false;
+  }
+
+  return ret;
+}
+
 
 // Begin Main Loop
 void loop()
@@ -218,73 +440,86 @@ void loop()
   // Current time
   unsigned long now;
 
-  if (digitalRead(leftPin) == HIGH)
-  {
-    Serial.println("Left");
-    //lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Left");
-  }
-  if (digitalRead(rightPin) == HIGH)
-  {
-    Serial.println("Right");
-    //lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Right");
-  }
-  if (digitalRead(upPin) == HIGH)
-  {
-    Serial.println("Up");
-    //lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Up");
-  }
-  if (digitalRead(downPin) == HIGH)
-  {
-    Serial.println("Down");
-    //lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Down");
-  }
-  if (digitalRead(selectPin) == HIGH)
-  {
-    Serial.println("Select");
-    //lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Select");
+  if (menuState != MENU_STATE_REFLOWING) {
 
-  }
-  // Test for Start Button Input
-  if (digitalRead(selectPin) == HIGH)
-  {
+    //now read from the joystick
+    if (digitalRead(leftPin) == HIGH)
+    {
+      if (debounceButton(leftPin)) {
+        //left, right, up, down, select
+        PrintMenuOptions(true, false, false, false, false);
+      }
+    }
 
-    for (int i = 0; i < 5; i++) {
-      if (digitalRead(selectPin) == HIGH)
+    if (digitalRead(rightPin) == HIGH)
+    {
+      if (debounceButton(rightPin)) {
+        //left, right, up, down, select
+        PrintMenuOptions(false, true, false, false, false);
+      }
+    }
+    else if (digitalRead(upPin) == HIGH)
+    {
+      if (debounceButton(upPin)) {
+        //left, right, up, down, select
+        PrintMenuOptions(false, false, true, false, false);
+      }
+    }
+    else if (digitalRead(downPin) == HIGH)
+    {
+      if (debounceButton(downPin)) {
+        //left, right, up, down, select
+        PrintMenuOptions(false, false, false, true, false);
+      }
+    }
+    else if (digitalRead(selectPin) == HIGH)
+    {
+      //left, right, up, down, select
+      if (debounceButton(selectPin)) {
+        PrintMenuOptions(false, false, false, false, true);
+      }
+    } else {
+      PrintMenuOptions(false, false, false, false, false);
+      return;
+    }
+
+
+    // Test for Start Button Input
+    if (digitalRead(selectPin) == HIGH)
+    {
+
+      for (int i = 0; i < 5; i++) {
+        if (digitalRead(selectPin) == HIGH)
+        {
+          ButtCount++;
+          delay(10);
+        }
+      }
+
+      if (ButtCount >= 5)
       {
-        ButtCount++;
-        delay(10);
-      }
-    }
+        //tone(BuzPin,4100,500); //Buzz the Buzzer
+        while (digitalRead(selectPin) != LOW) ;
+        reflowState = REFLOW_STATE_IDLE;
+        menuState = MENU_START_SELECTED;
 
-    if (ButtCount >= 5)
-    {
-      //tone(BuzPin,4100,500); //Buzz the Buzzer
-      while (digitalRead(selectPin) != LOW) ;
-      reflowState = REFLOW_STATE_IDLE;
-      if (reflowStatus == REFLOW_STATUS_ON) {
-        reflowState = REFLOW_STATE_ABORT;
-        StartTest = false;
-      } else {
-        StartTest = true;
+        if (reflowStatus == REFLOW_STATUS_ON) {
+          reflowState = REFLOW_STATE_ABORT;
+
+          StartTest = false;
+        } else {
+          StartTest = true;
+          menuState = MENU_STATE_REFLOWING;
+        }
       }
-    }
-    else
-    {
-      ButtCount = 0;
-      StartTest = false;
+      else
+      {
+        ButtCount = 0;
+        StartTest = false;
+        menuState = MENU_START_SELECTED;
+      }
     }
   }
-
 
   //********************************************************************************************************
   // Time to read thermocouple?
@@ -295,6 +530,7 @@ void loop()
     // Read current temperature
     inputOld = input; //Store Old Temperature
     input = thermocouple.readCelsius();
+    inputF = thermocouple.readFarenheit();
     if (isnan(input))
     {
       input = inputOld;
@@ -338,10 +574,10 @@ void loop()
       Serial.print(",");
       Serial.println(ssdMessagesReflowStatus[reflowState]);
       //lcd.clear();
-//      lcd.setCursor(0, 0);
-//      lcd.print("Reflow Status On");
-//      lcd.setCursor(11,1);
-//      lcd.print(input);
+      //      lcd.setCursor(0, 0);
+      //      lcd.print("Reflow Status On");
+      //      lcd.setCursor(11,1);
+      //      lcd.print(inputF);
     }
     else
     {
@@ -353,10 +589,10 @@ void loop()
       // Turn off LED
       //digitalWrite(Led, HIGH);
       //lcd.clear();
-      lcd.setCursor(0, 0);
-      lcd.print("Reflow Off");
-      lcd.setCursor(11,1);
-      lcd.print(input);
+      //lcd.setCursor(0, 0);
+      //lcd.print("Reflow Off");
+      //lcd.setCursor(11, 1);
+      //lcd.print(inputF);
     }
 
     // If currently in error state
@@ -368,9 +604,13 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("TC Error");
       lcd.setCursor(11, 1);
-      lcd.print(input);
+      lcd.print(inputF);
     }
   }
+
+
+
+
 
 
   // Reflow oven controller state machine
@@ -389,7 +629,7 @@ void loop()
         lcd.setCursor(0, 0);
         lcd.print(" - HOT - ");
         lcd.setCursor(11, 1);
-        lcd.print(input);
+        lcd.print(inputF);
       }
       else
       {
@@ -427,19 +667,19 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Preheating");
 
-      if(timerSeconds/100 != 0)
+      if (timerSeconds / 100 != 0)
         lcd.setCursor(13, 0);
-      else if(timerSeconds/10 != 0)
-        lcd.setCursor(14, 0);   
+      else if (timerSeconds / 10 != 0)
+        lcd.setCursor(14, 0);
       else
-        lcd.setCursor(15, 0);  
-      lcd.print(timerSeconds); 
+        lcd.setCursor(15, 0);
+      lcd.print(timerSeconds);
 
       lcd.setCursor(0, 1);
       lcd.print(setpoint);
-      
+
       lcd.setCursor(11, 1);
-      lcd.print(input);
+      lcd.print(inputF);
 
       reflowStatus = REFLOW_STATUS_ON;
       if (millis() > timerSoak)
@@ -467,7 +707,7 @@ void loop()
       lcd.print("Soaking");
 
       lcd.setCursor(11, 1);
-      lcd.print(input);
+      lcd.print(inputF);
       // If micro soak temperature is achieved
       if (millis() > timerSoak)
       {
@@ -491,7 +731,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Reflowing");
       lcd.setCursor(11, 1);
-      lcd.print(input);
+      lcd.print(inputF);
       // We need to avoid hovering at peak temperature for too long
       // Crude method that works like a charm and safe for the components
       if (input >= (TEMPERATURE_REFLOW_MAX - 5.0))
@@ -520,7 +760,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Cooling");
       lcd.setCursor(11, 1);
-      lcd.print(input);
+      lcd.print(inputF);
       // If minimum cool temperature is achieve
       if (input <= TEMPERATURE_COOL)
       {
@@ -543,7 +783,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Reflow Done");
       lcd.setCursor(11, 1);
-      lcd.print(input);
+      lcd.print(inputF);
       if (millis() > buzzerPeriod)
       {
         reflowState = REFLOW_STATE_IDLE;
@@ -564,7 +804,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Reflow Error");
       lcd.setCursor(11, 1);
-      lcd.print(input);
+      lcd.print(inputF);
       // If thermocouple problem is still present
       if (isnan(input))
       {
@@ -583,7 +823,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Abort");
       lcd.setCursor(11, 1);
-      lcd.print(input);
+      lcd.print(inputF);
       Serial.println("Abort!");
       StartTest = false;
       reflowStatus = REFLOW_STATUS_OFF;
@@ -606,10 +846,14 @@ void loop()
     if (output > (now - windowStartTime))
     {
       digitalWrite(HeaterPin, HIGH);
+      lcd.setCursor(7, 1);
+      lcd.print("ON ");
     }
     else
     {
       digitalWrite(HeaterPin, LOW);
+      lcd.setCursor(7, 1);
+      lcd.print("OFF");
     }
   }
   // Reflow oven process is off, ensure oven is off
