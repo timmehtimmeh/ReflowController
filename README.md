@@ -18,7 +18,7 @@ To add board support for our products, go to **File** > **Preferences**, and pas
 
 	https://raw.githubusercontent.com/timmehtimmeh/ReflowController/master/ReflowBoard/IDE_Board_Manager/package_TimmehTimmeh_index.json
 
-![Adding a board manager list](https://cdn.sparkfun.com/assets/learn_tutorials/4/5/4/arduino-board-add.png)
+![Adding a board manager list](Preferences.png)
 
 This field can be found in 'Preferences...' under the Arduino File menu.
 
