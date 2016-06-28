@@ -31,6 +31,16 @@ Now, under the **Tools** > **Board** > **Boards Manager...**, if you type in "Ti
 Now, when you select the Boards list, you will see a collection of new boards for Timmeh.
 
 
+### Flashing the bootloader
+
+To flash the bootloader, power up the board with either the onboard USB or the 2.1mm jack, and plug the board into a AVRISP MKII via the icsp port
+
+In Atmel Studio 
+Set the fuses to the  following values:
+* low_fuses = 0xFF
+* high_fuses = 0xD8
+* extended _fuses = 0xFE
+
 ### Cleaning up the Boards Menu
 
 Each entry in the boards list is defined in [boards.txt](https://github.com/timmehtimmeh/ReflowController/blob/master/ReflowBoard/timmehtimmeh/avr/boards.txt).
