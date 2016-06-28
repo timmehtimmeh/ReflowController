@@ -11,4 +11,4 @@ This project is based on TMK's headless reflow oven (https://github.com/tmk/Head
 
 rocketscream released the work under Creative Commons Share Alike v3.0 license.
 
-The bootloader and corresponding instructions are a modification of Sparkfun's bootloader code: (https://github.com/sparkfun/Arduino_Boards)
+The bootloader and corresponding installation instructions are a modification of Sparkfun's bootloader code: (https://github.com/sparkfun/Arduino_Boards)
