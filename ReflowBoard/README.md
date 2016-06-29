@@ -41,10 +41,6 @@ Set the fuses to the  following values:
 * high_fuses = 0xD8
 * extended _fuses = 0xFE
 
-### Cleaning up the Boards Menu
-
-Each entry in the boards list is defined in [boards.txt](https://github.com/timmehtimmeh/ReflowController/blob/master/ReflowBoard/timmehtimmeh/avr/boards.txt).
-
 ### Notes
 
 * **Please note: This will only work under Arduino IDE versions 1.5 and up.**
