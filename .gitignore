@@ -4,6 +4,9 @@
 *.o
 *.obj
 
+#board schematic saves
+*.b#*
+
 # Precompiled Headers
 *.gch
 *.pch
