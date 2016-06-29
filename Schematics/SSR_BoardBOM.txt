@@ -1,0 +1,13 @@
+Partlist exported from C:/Users/timme/Documents/Arduino/ReflowController/Schematics/SSR_Board.sch at 6/28/2016 10:34 PM
+
+Qty Value       Device                Package               Parts              Description                    PROD_ID     VALUE
+1               M03SCREW              SCREWTERMINAL-3.5MM-3 JP2                Header 3                                        
+1   100         RESISTOR0603-RES      0603-RES              R6                 Resistor                                        
+1   10k         RESISTOR0603-RES      0603-RES              R8                 Resistor                                        
+1   220         RESISTOR0603-RES      0603-RES              R7                 Resistor                                        
+1   2N3904      TRANSISTOR_NPNSOT23-3 SOT23-3               Q2                 Generic NPN BJT                TRANS-08049      
+1   330         RESISTOR0603-RES      0603-RES              R5                 Resistor                                        
+1   6PCV-02-006 6PCV-02-006           6PCV-02-006           U$2                TE-Connectivity-AMP-Connectors                  
+1   GREEN       LED-GREEN0603         LED-0603              D1                 Various green LEDs             DIO-00821   GREEN
+1   S108T02     RELAY-SOLIDSTATEPTH   RELAY-S108T02         U1                                                                 
+4   STAND-OFF   STAND-OFF             STAND-OFF             U$3, U$4, U$5, U$7 Stand Off                                       

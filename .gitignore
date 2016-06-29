@@ -4,8 +4,9 @@
 *.o
 *.obj
 
-#board schematic saves
+#eagle files
 *.b#*
+*.lck
 
 # Precompiled Headers
 *.gch
