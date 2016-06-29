@@ -245,15 +245,21 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
   //  MENU_SET_COOL_PARAMS,
   //  MENU_STATE_REFLOWING
 
+  if (millis() > nextRead)
+  {
+    // Read thermocouple next sampling period
+    nextRead += SENSOR_SAMPLING_TIME;
+    input = thermocouple.readCelsius();
+    lcd.setCursor(11, 1);
+    lcd.print(input);
+  }
   switch (menuState)
   {
-    input = thermocouple.readCelsius();
+
     case MENU_START_SELECTED:
       lcd.setCursor(0, 0);
       lcd.print("Cool >Start  Preheat");
-      
-      lcd.setCursor(11, 1);
-      lcd.print(input);
+
       if (leftPin) {
         menuState = MENU_COOL_PARAMS_SELECTED;
       } else if (rightPin) {
@@ -267,8 +273,7 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
     case MENU_PREHEAT_PARAMS_SELECTED:
       lcd.setCursor(0, 0);
       lcd.print("Start >Preheat  Soak");
-      lcd.setCursor(11, 1);
-      lcd.print(input);
+
       if (leftPin) {
         menuState = MENU_START_SELECTED;
       } else if (rightPin) {
@@ -284,8 +289,7 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
     case MENU_SOAK_PARAMS_SELECTED:
       lcd.setCursor(0, 0);
       lcd.print("Preheat >Soak Reflow");
-      lcd.setCursor(11, 1);
-      lcd.print(input);
+
       if (leftPin) {
         menuState = MENU_PREHEAT_PARAMS_SELECTED;
       } else if (rightPin) {
@@ -300,8 +304,7 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
     case MENU_REFLOW_PARAMS_SELECTED:
       lcd.setCursor(0, 0);
       lcd.print("Soak >Reflow Cool");
-      lcd.setCursor(11, 1);
-      lcd.print(input);
+
       if (leftPin) {
         menuState = MENU_SOAK_PARAMS_SELECTED;
       } else if (rightPin) {
@@ -316,8 +319,7 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
     case MENU_COOL_PARAMS_SELECTED:
       lcd.setCursor(0, 0);
       lcd.print("Reflow >Cool  Start");
-      lcd.setCursor(11, 1);
-      lcd.print(input);
+
       if (leftPin) {
         menuState = MENU_REFLOW_PARAMS_SELECTED;
       } else if (rightPin) {
@@ -341,8 +343,7 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
       lcd.print("Preheat Max     Curr");
       lcd.setCursor(0, 1);
       lcd.print(TEMPERATURE_SOAK_MIN);
-      lcd.setCursor(11, 1);
-      lcd.print(input);
+
       if (leftPin || downPin) {
         TEMPERATURE_SOAK_MIN -= 5;
       } else if (rightPin || upPin) {
@@ -356,8 +357,7 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
       lcd.print("Soak Max     Curr");
       lcd.setCursor(0, 1);
       lcd.print(TEMPERATURE_SOAK_MAX);
-      lcd.setCursor(11, 1);
-      lcd.print(input);
+
       if (leftPin || downPin) {
         TEMPERATURE_SOAK_MAX -= 5;
       } else if (rightPin || upPin) {
@@ -371,8 +371,7 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
       lcd.print("Reflow Max     Curr");
       lcd.setCursor(0, 1);
       lcd.print(TEMPERATURE_REFLOW_MAX);
-      lcd.setCursor(11, 1);
-      lcd.print(input);
+
       if (leftPin || downPin) {
         TEMPERATURE_REFLOW_MAX -= 5;
       } else if (rightPin || upPin) {
@@ -386,8 +385,7 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
       lcd.print("Cool To     Curr");
       lcd.setCursor(0, 1);
       lcd.print(TEMPERATURE_COOL);
-      lcd.setCursor(11, 1);
-      lcd.print(input);
+
       if (leftPin || downPin) {
         TEMPERATURE_COOL -= 5;
       } else if (rightPin || upPin) {
