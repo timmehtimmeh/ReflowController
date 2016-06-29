@@ -146,7 +146,7 @@ LiquidCrystal lcd(5, 4, 1, 0, 2, 3);
 double setpoint;
 double input;
 double inputOld; //Store old Temperature
-double inputF;
+
 double output;
 double kp = PID_KP_PREHEAT;
 double ki = PID_KI_PREHEAT;
@@ -247,12 +247,13 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
 
   switch (menuState)
   {
+    input = thermocouple.readCelsius();
     case MENU_START_SELECTED:
       lcd.setCursor(0, 0);
       lcd.print("Cool >Start  Preheat");
-      inputF = thermocouple.readFarenheit();
+      
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       if (leftPin) {
         menuState = MENU_COOL_PARAMS_SELECTED;
       } else if (rightPin) {
@@ -260,14 +261,14 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
       }
       else if (selectPin) {
         menuState = MENU_STATE_REFLOWING;
+        StartTest = true;
       }
       break;
     case MENU_PREHEAT_PARAMS_SELECTED:
       lcd.setCursor(0, 0);
       lcd.print("Start >Preheat  Soak");
-      inputF = thermocouple.readFarenheit();
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       if (leftPin) {
         menuState = MENU_START_SELECTED;
       } else if (rightPin) {
@@ -283,9 +284,8 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
     case MENU_SOAK_PARAMS_SELECTED:
       lcd.setCursor(0, 0);
       lcd.print("Preheat >Soak Reflow");
-      inputF = thermocouple.readFarenheit();
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       if (leftPin) {
         menuState = MENU_PREHEAT_PARAMS_SELECTED;
       } else if (rightPin) {
@@ -300,9 +300,8 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
     case MENU_REFLOW_PARAMS_SELECTED:
       lcd.setCursor(0, 0);
       lcd.print("Soak >Reflow Cool");
-      inputF = thermocouple.readFarenheit();
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       if (leftPin) {
         menuState = MENU_SOAK_PARAMS_SELECTED;
       } else if (rightPin) {
@@ -317,9 +316,8 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
     case MENU_COOL_PARAMS_SELECTED:
       lcd.setCursor(0, 0);
       lcd.print("Reflow >Cool  Start");
-      inputF = thermocouple.readFarenheit();
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       if (leftPin) {
         menuState = MENU_REFLOW_PARAMS_SELECTED;
       } else if (rightPin) {
@@ -343,9 +341,8 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
       lcd.print("Preheat Max     Curr");
       lcd.setCursor(0, 1);
       lcd.print(TEMPERATURE_SOAK_MIN);
-      inputF = thermocouple.readFarenheit();
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       if (leftPin || downPin) {
         TEMPERATURE_SOAK_MIN -= 5;
       } else if (rightPin || upPin) {
@@ -359,9 +356,8 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
       lcd.print("Soak Max     Curr");
       lcd.setCursor(0, 1);
       lcd.print(TEMPERATURE_SOAK_MAX);
-      inputF = thermocouple.readFarenheit();
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       if (leftPin || downPin) {
         TEMPERATURE_SOAK_MAX -= 5;
       } else if (rightPin || upPin) {
@@ -375,9 +371,8 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
       lcd.print("Reflow Max     Curr");
       lcd.setCursor(0, 1);
       lcd.print(TEMPERATURE_REFLOW_MAX);
-      inputF = thermocouple.readFarenheit();
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       if (leftPin || downPin) {
         TEMPERATURE_REFLOW_MAX -= 5;
       } else if (rightPin || upPin) {
@@ -391,9 +386,8 @@ void PrintMenuOptions(bool leftPin, bool rightPin, bool upPin, bool downPin, boo
       lcd.print("Cool To     Curr");
       lcd.setCursor(0, 1);
       lcd.print(TEMPERATURE_COOL);
-      inputF = thermocouple.readFarenheit();
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       if (leftPin || downPin) {
         TEMPERATURE_COOL -= 5;
       } else if (rightPin || upPin) {
@@ -482,34 +476,22 @@ void loop()
       PrintMenuOptions(false, false, false, false, false);
       return;
     }
-
-
-    // Test for Start Button Input
+  } else { //menu state is reflowing
+    // Test for Abort Button Input
     if (digitalRead(selectPin) == HIGH)
     {
-
-      for (int i = 0; i < 5; i++) {
-        if (digitalRead(selectPin) == HIGH)
-        {
-          ButtCount++;
-          delay(10);
-        }
-      }
-
-      if (ButtCount >= 5)
-      {
+      if (debounceButton(selectPin)) {
         //tone(BuzPin,4100,500); //Buzz the Buzzer
         while (digitalRead(selectPin) != LOW) ;
         reflowState = REFLOW_STATE_IDLE;
-        menuState = MENU_START_SELECTED;
+
 
         if (reflowStatus == REFLOW_STATUS_ON) {
           reflowState = REFLOW_STATE_ABORT;
-
+          menuState = MENU_START_SELECTED;
           StartTest = false;
         } else {
-          StartTest = true;
-          menuState = MENU_STATE_REFLOWING;
+
         }
       }
       else
@@ -530,7 +512,7 @@ void loop()
     // Read current temperature
     inputOld = input; //Store Old Temperature
     input = thermocouple.readCelsius();
-    inputF = thermocouple.readFarenheit();
+
     if (isnan(input))
     {
       input = inputOld;
@@ -577,7 +559,7 @@ void loop()
       //      lcd.setCursor(0, 0);
       //      lcd.print("Reflow Status On");
       //      lcd.setCursor(11,1);
-      //      lcd.print(inputF);
+      //      lcd.print(input);
     }
     else
     {
@@ -592,7 +574,7 @@ void loop()
       //lcd.setCursor(0, 0);
       //lcd.print("Reflow Off");
       //lcd.setCursor(11, 1);
-      //lcd.print(inputF);
+      //lcd.print(input);
     }
 
     // If currently in error state
@@ -604,7 +586,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("TC Error");
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
     }
   }
 
@@ -629,7 +611,7 @@ void loop()
         lcd.setCursor(0, 0);
         lcd.print(" - HOT - ");
         lcd.setCursor(11, 1);
-        lcd.print(inputF);
+        lcd.print(input);
       }
       else
       {
@@ -679,7 +661,7 @@ void loop()
       lcd.print(setpoint);
 
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
 
       reflowStatus = REFLOW_STATUS_ON;
       if (millis() > timerSoak)
@@ -707,7 +689,7 @@ void loop()
       lcd.print("Soaking");
 
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       // If micro soak temperature is achieved
       if (millis() > timerSoak)
       {
@@ -731,7 +713,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Reflowing");
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       // We need to avoid hovering at peak temperature for too long
       // Crude method that works like a charm and safe for the components
       if (input >= (TEMPERATURE_REFLOW_MAX - 5.0))
@@ -760,7 +742,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Cooling");
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       // If minimum cool temperature is achieve
       if (input <= TEMPERATURE_COOL)
       {
@@ -783,7 +765,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Reflow Done");
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       if (millis() > buzzerPeriod)
       {
         reflowState = REFLOW_STATE_IDLE;
@@ -804,7 +786,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Reflow Error");
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       // If thermocouple problem is still present
       if (isnan(input))
       {
@@ -823,7 +805,7 @@ void loop()
       lcd.setCursor(0, 0);
       lcd.print("Abort");
       lcd.setCursor(11, 1);
-      lcd.print(inputF);
+      lcd.print(input);
       Serial.println("Abort!");
       StartTest = false;
       reflowStatus = REFLOW_STATUS_OFF;
