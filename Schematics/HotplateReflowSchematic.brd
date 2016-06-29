@@ -146,8 +146,8 @@
 <wire x1="84.76" y1="22.86" x2="84.76" y2="80" width="0" layer="20"/>
 <wire x1="84.76" y1="80" x2="-3.81" y2="80" width="0" layer="20"/>
 <wire x1="-3.81" y1="80" x2="-3.81" y2="22.86" width="0" layer="20"/>
-<text x="47.555" y="30.46" size="1.27" layer="21" font="vector">USB</text>
-<text x="42.50625" y="33.02875" size="1.27" layer="21" font="vector" rot="R180">JCK</text>
+<text x="39.955" y="30.46" size="1.27" layer="21" font="vector">USB</text>
+<text x="50.20625" y="31.72875" size="1.27" layer="21" font="vector" rot="R180">JCK</text>
 <text x="-2.8575" y="66.675" size="1.016" layer="21" font="vector">T-  Red</text>
 <text x="-2.8575" y="59.53125" size="1.016" layer="21" font="vector">T+  Yel</text>
 <text x="16.39" y="33.5" size="1.27" layer="25" font="vector">5V</text>
