@@ -2,7 +2,7 @@
 
 This repository contains support for the following TimmehTimmeh Arduino-compatible reflow oven controller.  The reflow controller runs on an Atmega32u4 at 3.3V/8MHz.
 
-#Attributions
+# Attributions
 This project is based on TMK's headless reflow oven (https://github.com/tmk/HeadlessReflowOven) which is in turn based on  work of 
 
 * [ohararp ReflowOven]  (https://github.com/ohararp/ReflowOven)
